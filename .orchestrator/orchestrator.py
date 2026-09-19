@@ -459,11 +459,12 @@ def run_codex_advisor(
         "--sandbox", config["sandbox_advisor"],
         "--output-last-message", str(output_file),
         "--json",
-        prompt,
+        "-",
     ]
 
     result = subprocess.run(
         cmd,
+        input=prompt,
         cwd=str(task_dir),
         capture_output=True,
         text=True,
@@ -526,11 +527,21 @@ def run_agy_executor(
 
     log.info(f"[Round {round_num}] Gọi AGY executor...")
 
+    if len(prompt) > 24000:
+        prompt_file = task_dir / "logs" / f"round-{round_num}-agy-prompt.txt"
+        write_file(prompt_file, prompt)
+        agy_prompt = (
+            f"BẮT BUỘC: Sử dụng tool xem file để đọc toàn bộ nội dung hướng dẫn, nhiệm vụ và kế hoạch thực thi trong file: "
+            f"{prompt_file.resolve()} và tiến hành thực hiện đúng theo các yêu cầu đó."
+        )
+    else:
+        agy_prompt = prompt
+
     cmd = [
         "agy",
         "--dangerously-skip-permissions",
         "--output-format", "text",
-        "--print", prompt,
+        "--print", agy_prompt,
     ]
 
     result = subprocess.run(
@@ -606,11 +617,12 @@ def run_codex_auditor(
         "--sandbox", config["sandbox_auditor"],
         "--output-last-message", str(output_file),
         "--json",
-        prompt,
+        "-",
     ]
 
     result = subprocess.run(
         cmd,
+        input=prompt,
         cwd=str(task_dir),
         capture_output=True,
         text=True,
@@ -774,12 +786,13 @@ def maybe_update_lessons_learned(
         "codex", "exec",
         "--sandbox", "workspace-write",
         "--json",
-        prompt,
+        "-",
     ]
 
     try:
         result = subprocess.run(
             cmd,
+            input=prompt,
             cwd=str(orch_dir.parent),
             capture_output=True,
             text=True,
