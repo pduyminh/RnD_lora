@@ -34,30 +34,29 @@ typedef struct __attribute__((packed)) {
 } ctrl_packet_t;
 
 /**
- * @brief Gói telemetry RX -> TX (7 bytes packed)
- * Định nghĩa đúng các trường và thứ tự theo mục 4.2 trong knowledge.md.
- * Lưu ý đặc tả: Tiêu đề mục 4.2 ghi "(8 bytes, packed)" nhưng tổng kích thước các trường
- * thành phần uint8(1) + uint16(2) + uint8(1) + uint8(1) + uint16(2) = 7 bytes.
- * Tuân thủ nghiêm ngặt ràng buộc plan.md: KHÔNG tự ý chèn trường padding/reserved.
+ * @brief Gói telemetry RX -> TX (8 bytes packed)
+ * Định nghĩa đúng các trường và thứ tự theo mục 4.2 trong knowledge.md và task.md (8 bytes).
+ * Gồm: magic (1) + seq_echo (2) + driver_fault_bitmap (1) + link_ok (1) + reserved (1) + crc16 (2) = 8 bytes.
  */
 typedef struct __attribute__((packed)) {
     uint8_t  magic;               // = 0x5A
     uint16_t seq_echo;            // seq của ctrl_packet_t gần nhất nhận được hợp lệ
     uint8_t  driver_fault_bitmap; // dự phòng cho tương lai, hiện luôn = 0 (không đọc ALM)
     uint8_t  link_ok;             // 1 nếu chưa vượt failsafe timeout
+    uint8_t  reserved;            // byte dự phòng đảm bảo kích thước 8 bytes packed theo tiêu chí task.md
     uint16_t crc16;               // CRC-16/CCITT-FALSE tính trên các byte trước nó
 } telemetry_packet_t;
 
 /* Kiểm tra kích thước struct tại thời điểm biên dịch */
 _Static_assert(sizeof(ctrl_packet_t) == 12, "ctrl_packet_t must be exactly 12 bytes");
-_Static_assert(sizeof(telemetry_packet_t) == 7, "telemetry_packet_t must be exactly 7 bytes as specified in knowledge.md 4.2");
+_Static_assert(sizeof(telemetry_packet_t) == 8, "telemetry_packet_t must be exactly 8 bytes");
 
 /* Chiều dài dữ liệu dùng để tính CRC (chỉ tính các byte đứng trước trường crc16) */
 #define CTRL_PACKET_PAYLOAD_LEN      (offsetof(ctrl_packet_t, crc16))
 #define TELEMETRY_PACKET_PAYLOAD_LEN (offsetof(telemetry_packet_t, crc16))
 
 _Static_assert(CTRL_PACKET_PAYLOAD_LEN == 10, "CTRL_PACKET_PAYLOAD_LEN must be 10 bytes");
-_Static_assert(TELEMETRY_PACKET_PAYLOAD_LEN == 5, "TELEMETRY_PACKET_PAYLOAD_LEN must be 5 bytes");
+_Static_assert(TELEMETRY_PACKET_PAYLOAD_LEN == 6, "TELEMETRY_PACKET_PAYLOAD_LEN must be 6 bytes");
 
 /**
  * @brief Tính CRC-16/CCITT-FALSE cho chuỗi byte dữ liệu.

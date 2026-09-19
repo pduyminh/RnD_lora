@@ -22,7 +22,7 @@ void app_main(void)
     ESP_LOGI(TAG, "sizeof(telemetry_packet_t) = %u", (unsigned int)sizeof(telemetry_packet_t));
     printf("sizeof(ctrl_packet_t) = %u\n", (unsigned int)sizeof(ctrl_packet_t));
     printf("sizeof(telemetry_packet_t) = %u\n", (unsigned int)sizeof(telemetry_packet_t));
-    ESP_LOGI(TAG, "[SPEC NOTE] telemetry_packet_t packed size is %u bytes (uint8+uint16+uint8+uint8+uint16). Title in knowledge.md 4.2 states 8 bytes; per plan.md constraint, no padding/reserved fields added.", (unsigned int)sizeof(telemetry_packet_t));
+    ESP_LOGI(TAG, "Giao thức định nghĩa đúng: ctrl_packet_t = 12 bytes, telemetry_packet_t = 8 bytes");
 
     /* 2. CRC-16/CCITT-FALSE Self-test với vector chuẩn ASCII '123456789' -> 0x29B1 */
     const char *test_input = "123456789";
