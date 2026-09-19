@@ -1,0 +1,20 @@
+[orchestrator]
+max_rounds = 3
+project_root = "."
+
+[git]
+base_branch = "dev"
+protected_branches = ["main"]
+
+[timeouts]
+codex_seconds = 600
+agy_seconds = 1800
+
+[sandbox]
+codex_advisor = "read-only"
+codex_auditor = "read-only"
+agy_executor  = "workspace-write"
+
+[escalation]
+notify_on_escalate = true
+early_escalate_on_stagnation = true   # 2 round liên tiếp số mục FAIL không giảm → escalate sớm

@@ -1,0 +1,16 @@
+#!/bin/bash
+# Git hook: chặn push vào branch main
+# Setup: cp .orchestrator/hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+protected_branch="main"
+while read local_ref local_sha remote_ref remote_sha; do
+  remote_branch=$(echo "$remote_ref" | sed 's|refs/heads/||')
+  if [ "$remote_branch" = "$protected_branch" ]; then
+    if [ -z "$ALLOW_MAIN_PUSH" ]; then
+      echo "❌ Chặn push vào '$protected_branch'."
+      echo "   Nếu đây là chủ đích của bạn (không phải orchestrator), chạy:"
+      echo "   ALLOW_MAIN_PUSH=1 git push"
+      exit 1
+    fi
+  fi
+done
+exit 0
