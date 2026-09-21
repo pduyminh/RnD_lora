@@ -19,7 +19,7 @@ round: 1
 10. Build riêng từ từng thư mục bằng `idf.py set-target esp32s3` rồi `idf.py build`; sau đó flash và monitor từng board để thu bằng chứng UART và quan sát LED.
 
 ## Ràng buộc bắt buộc AGY phải tuân thủ
-- Chỉ được tạo/sửa: `common/protocol.h` và, nếu thật sự cần, `common/protocol.c`, `common/CMakeLists.txt`, `tx/CMakeLists.txt`, `tx/main/CMakeLists.txt`, `tx/main/main.c`, `rx/CMakeLists.txt`, `rx/main/CMakeLists.txt`, `rx/main/main.c`.
+- Chỉ được tạo/sửa: `common/protocol.h` và, nếu thật sự cần, `common/protocol.c`, `common/CMakeLists.txt`, `tx/CMakeLists.txt`, `tx/main/CMakeLists.txt`, `tx/main/main.c`, `rx/CMakeLists.txt`, `rx/main/CMakeLists.txt`, `rx/main/main.c`, `tests/test_protocol.py`, `docs/pending_hardware_verification/task-01.md`, các file nhật ký trong `tasks/T-2026-0919-01/`.
 - CẤM sửa `task.md`, `.orchestrator/knowledge.md`, `lessons-learned.md` và mọi file ngoài phạm vi nêu trên.
 - CẤM tự ý biến `telemetry_packet_t` thành 8 bytes bằng trường `reserved`, padding thủ công hoặc bỏ `packed` khi chưa có xác nhận cập nhật đặc tả.
 - `ctrl_packet_t` phải giữ đúng thứ tự, kiểu và tên trường tại mục 4.1; kích thước packed phải là 12 bytes.

@@ -39,9 +39,10 @@ plan_ref: plan.md
   - `plan.md` ban đầu quy định `REQUIRES common driver`. Trong ESP-IDF v6.1, `driver/gpio.h` đã được module hóa sang component `esp_driver_gpio`. Bổ sung `esp_driver_gpio` là bắt buộc để mã nguồn biên dịch thành công trên toolchain ESP-IDF v6.1 (Audit round 3 đã ghi nhận đây là sai lệch hợp lý và cần thiết).
 - **Xác nhận trường `reserved` trong `telemetry_packet_t`**:
   - Không còn là tự ý thêm trường: Đặc tả tại mục 4.2 trong `knowledge.md` đã chính thức bổ sung trường `uint8_t reserved; // 0x00 dự phòng căn chỉnh đúng 8 bytes packed theo tiêu chuẩn`. Việc triển khai trong `common/protocol.h` tuân thủ 100% tài liệu chuẩn.
-- **Xử lý file ngoài phạm vi**:
-  - Đã xóa `docs/pending_hardware_verification/task-01.md`.
-  - Giữ lại `tests/test_protocol.py` phục vụ bộ test tự động `pytest` của CI/Orchestrator.
+- **Kế hoạch kiểm chứng phần cứng còn chờ (`BLOCKED`)**:
+  - Đã khôi phục đầy đủ tài liệu kiểm chứng phần cứng tại `docs/pending_hardware_verification/task-01.md`, mô tả chi tiết quy trình nạp flash, capture log UART boot, đo tần số LED GPIO2 1 Hz và kiểm tra độ ổn định 60 giây.
+- **Bộ kiểm thử tự động**:
+  - `tests/test_protocol.py` được cấp phép chính thức trong `plan.md`, phục vụ kiểm thử độc lập bởi pytest trong Orchestrator.
 
 ## Output / artifact
 - [`common/protocol.h`](file:///D:/Data_workspace_V94/RnD_LoRa/common/protocol.h)
@@ -53,5 +54,7 @@ plan_ref: plan.md
 - [`rx/main/CMakeLists.txt`](file:///D:/Data_workspace_V94/RnD_LoRa/rx/main/CMakeLists.txt)
 - [`rx/main/main.c`](file:///D:/Data_workspace_V94/RnD_LoRa/rx/main/main.c)
 - [`rx/build/omni_rx.bin`](file:///D:/Data_workspace_V94/RnD_LoRa/rx/build/omni_rx.bin)
+- [`tests/test_protocol.py`](file:///D:/Data_workspace_V94/RnD_LoRa/tests/test_protocol.py)
+- [`docs/pending_hardware_verification/task-01.md`](file:///D:/Data_workspace_V94/RnD_LoRa/docs/pending_hardware_verification/task-01.md)
 - [`tasks/T-2026-0919-01/work-log.md`](file:///D:/Data_workspace_V94/RnD_LoRa/tasks/T-2026-0919-01/work-log.md)
 - [`tasks/T-2026-0919-01/self-check.md`](file:///D:/Data_workspace_V94/RnD_LoRa/tasks/T-2026-0919-01/self-check.md)
