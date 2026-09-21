@@ -7,6 +7,7 @@
 #include "protocol.h"
 #include "kinematics.h"
 #include "axis_driver.h"
+#include "comm.h"
 
 static const char *TAG = "OMNI_RX";
 
@@ -69,7 +70,31 @@ void app_main(void)
         ESP_LOGI(TAG, "Axis Driver sẵn sàng. Cả 3 trục đã khóa lực giữ ENA.");
     }
 
-    /* 5. Cấu hình GPIO2 làm output cho status LED */
+    /* 5. T04: Khởi tạo Communication Pipeline (ESP-NOW RX + Failsafe + Kinematics + Axis Driver) */
+    esp_err_t comm_err = comm_init();
+    if (comm_err != ESP_OK) {
+        ESP_LOGE(TAG, "Lỗi khởi tạo Comm Pipeline: %s", esp_err_to_name(comm_err));
+    } else {
+        ESP_LOGI(TAG, "Comm Pipeline khởi tạo thành công (ESP-NOW RX 50Hz, failsafe 300ms).");
+    }
+
+    /* Self-test: Thử nghiệm gói tin giả lập để kiểm tra bộ lọc validation */
+    ctrl_packet_t mock_pkt = {
+        .magic = CTRL_MAGIC,
+        .seq = 1,
+        .vx_mm_s = 500,     // 0.5 m/s
+        .vy_mm_s = 0,
+        .omega_mrad_s = 0,
+        .estop = 0,
+        .crc16 = 0,
+    };
+    mock_pkt.crc16 = crc16_ccitt_false((const uint8_t *)&mock_pkt, sizeof(mock_pkt) - sizeof(uint16_t));
+    uint8_t mock_mac[6] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+    bool p_ok = comm_process_packet(mock_mac, (const uint8_t *)&mock_pkt, sizeof(mock_pkt));
+    ESP_LOGI(TAG, "Pipeline self-test mock packet: %s (seq=%u, dropped_count=%lu)",
+             p_ok ? "ACCEPT" : "REJECT", comm_get_last_seq(), (unsigned long)comm_get_dropped_packet_count());
+
+    /* 6. Cấu hình GPIO2 làm output cho status LED */
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << STATUS_LED_GPIO),
         .mode = GPIO_MODE_OUTPUT,
