@@ -40,3 +40,4 @@ round: {round}
 - Ưu tiên giải pháp đơn giản, ít rủi ro.
 - Liệt kê rõ file nào được sửa, file nào CẤM sửa.
 - Mỗi tiêu chí phải đo lường được (có test, có lệnh kiểm tra cụ thể).
+- Dự án chưa có phần cứng cắm thật: Hướng dẫn AGY tạo file kế hoạch kiểm chứng phần cứng chi tiết tại `docs/pending_hardware_verification/task-XX.md` đánh dấu [BLOCKED] cho các tiêu chí nạp chip/đo UART/đo GPIO, đồng thời tập trung hoàn thiện 100% build ESP-IDF, Static Assert và unit test pytest.

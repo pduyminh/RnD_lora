@@ -72,6 +72,9 @@ def load_config(orchestrator_dir: Path) -> dict:
     protected = set(git_cfg.get("protected_branches", list(DEFAULT_PROTECTED_BRANCHES)))
     base_branch = git_cfg.get("base_branch", DEFAULT_BASE_BRANCH)
 
+    testing_cfg = raw.get("testing", {})
+    test_commands = testing_cfg.get("commands", [])
+
     return {
         "max_rounds": raw.get("orchestrator", {}).get("max_rounds", DEFAULT_MAX_ROUNDS),
         "codex_timeout": raw.get("timeouts", {}).get("codex_seconds", DEFAULT_CODEX_TIMEOUT),
@@ -84,6 +87,7 @@ def load_config(orchestrator_dir: Path) -> dict:
         ),
         "base_branch": base_branch,
         "protected_branches": protected,
+        "test_commands": test_commands,
     }
 
 
@@ -650,27 +654,53 @@ def run_codex_auditor(
 #  7. OBJECTIVE VERIFICATION (mục 10.2)
 # ═══════════════════════════════════════════════════════════════════
 
-def run_objective_tests(project_root: Path) -> str:
-    """Chạy test thật, trả về output để đưa vào prompt audit."""
+def run_objective_tests(project_root: Path, config: dict) -> str:
+    """Chạy test/build thật, trả về output để đưa vào prompt audit.
+
+    Orchestrator tự chạy độc lập — không tin self-report của AI.
+    """
     results = []
-    if (project_root / "tests").exists():
-        try:
-            r = subprocess.run(
-                [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"],
-                cwd=str(project_root),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                timeout=120,
-            )
-            results.append(
-                f"=== pytest ===\n"
-                f"Exit code: {r.returncode}\n{r.stdout}\n{r.stderr}"
-            )
-        except Exception as e:
-            results.append(f"=== pytest ===\nLỗi: {e}")
+    test_commands = config.get("test_commands", [])
+
+    if test_commands:
+        for cmd in test_commands:
+            cmd_str = " ".join(cmd) if isinstance(cmd, list) else str(cmd)
+            try:
+                r = subprocess.run(
+                    cmd_str,
+                    shell=True,
+                    cwd=str(project_root),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=300,
+                )
+                results.append(
+                    f"=== Lệnh: {cmd_str} ===\n"
+                    f"Exit code: {r.returncode}\n{r.stdout}\n{r.stderr}"
+                )
+            except Exception as e:
+                results.append(f"=== Lệnh: {cmd_str} ===\nLỗi: {e}")
     else:
-        results.append("Chưa có thư mục tests/ để chạy tự động.")
+        tests_dir = project_root / "tests"
+        if tests_dir.exists():
+            try:
+                r = subprocess.run(
+                    [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"],
+                    cwd=str(project_root),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=120,
+                )
+                results.append(
+                    f"=== pytest ===\n"
+                    f"Exit code: {r.returncode}\n{r.stdout}\n{r.stderr}"
+                )
+            except Exception as e:
+                results.append(f"=== pytest ===\nLỗi: {e}")
+        else:
+            results.append("Chưa có thư mục tests/ để chạy tự động.")
 
     return "\n\n".join(results)
 
@@ -920,7 +950,7 @@ def orchestrate(task_dir_str: str) -> None:
 
             # ── PHASE 3: AUDITING ──
             if phase == "auditing":
-                test_result = run_objective_tests(project_root)
+                test_result = run_objective_tests(project_root, config)
                 log.info(
                     f"Kết quả test khách quan:\n"
                     f"{test_result[:500]}..."

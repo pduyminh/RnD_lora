@@ -18,3 +18,11 @@ agy_executor  = "workspace-write"
 [escalation]
 notify_on_escalate = true
 early_escalate_on_stagnation = true   # 2 round liên tiếp số mục FAIL không giảm → escalate sớm
+
+[testing]
+commands = [
+    "idf.py -C tx build",
+    "idf.py -C rx build",
+    "python -m pytest tests -v --tb=short",
+    "git diff --check"
+]

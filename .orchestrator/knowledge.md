@@ -116,6 +116,7 @@ typedef struct __attribute__((packed)) {
     uint16_t seq_echo;             // seq của ctrl_packet_t gần nhất nhận được hợp lệ
     uint8_t  driver_fault_bitmap;  // dự phòng cho tương lai, hiện luôn = 0 (không đọc ALM)
     uint8_t  link_ok;              // 1 nếu chưa vượt failsafe timeout
+    uint8_t  reserved;             // 0x00 dự phòng căn chỉnh đúng 8 bytes packed theo tiêu chuẩn
     uint16_t crc16;
 } telemetry_packet_t;
 ```
