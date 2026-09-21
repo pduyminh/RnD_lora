@@ -5,6 +5,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "protocol.h"
+#include "kinematics.h"
 
 static const char *TAG = "OMNI_RX";
 
@@ -32,6 +33,32 @@ void app_main(void)
 
     ESP_LOGI(TAG, "CRC-16/CCITT-FALSE self-test: input=\"%s\", expected=0x%04X, actual=0x%04X -> %s",
              test_input, expected_crc, actual_crc, crc_pass ? "PASS" : "FAIL");
+
+    /* 3. T02: Kiểm tra động học tam giác (Kinematics) với 3 bộ input test cố định */
+    int32_t pps[3];
+
+    // Bộ test 1: vx = 1.0 m/s, vy = 0.0 m/s, omega = 0.0 rad/s
+    kinematics_compute(1.0f, 0.0f, 0.0f, pps);
+    ESP_LOGI(TAG, "Kinematics Test 1 (vx=1.0, vy=0.0, w=0.0) -> Axis A: %ld, Axis B: %ld, Axis C: %ld pps",
+             (long)pps[0], (long)pps[1], (long)pps[2]);
+
+    // Bộ test 2: vx = 0.0 m/s, vy = 0.0 m/s, omega = 2.0 rad/s
+    kinematics_compute(0.0f, 0.0f, 2.0f, pps);
+    ESP_LOGI(TAG, "Kinematics Test 2 (vx=0.0, vy=0.0, w=2.0) -> Axis A: %ld, Axis B: %ld, Axis C: %ld pps",
+             (long)pps[0], (long)pps[1], (long)pps[2]);
+
+    // Bộ test 3: vx = 0.5 m/s, vy = 0.5 m/s, omega = 1.0 rad/s
+    kinematics_compute(0.5f, 0.5f, 1.0f, pps);
+    ESP_LOGI(TAG, "Kinematics Test 3 (vx=0.5, vy=0.5, w=1.0) -> Axis A: %ld, Axis B: %ld, Axis C: %ld pps",
+             (long)pps[0], (long)pps[1], (long)pps[2]);
+
+    // Kiểm tra bộ ramp gia tốc mượt hóa (Anti-Jerk S-curve) từ 0 đến Target Test 1
+    int32_t current_pps[3] = {0, 0, 0};
+    int32_t target_pps[3];
+    kinematics_compute(1.0f, 0.0f, 0.0f, target_pps);
+    kinematics_ramp_update(target_pps, current_pps, 0.02f);
+    ESP_LOGI(TAG, "Kinematics Ramp 1-step (20ms) -> Axis A: %ld, Axis B: %ld, Axis C: %ld pps (Anti-Jerk start)",
+             (long)current_pps[0], (long)current_pps[1], (long)current_pps[2]);
 
     /* 3. Cấu hình GPIO2 làm output cho status LED */
     gpio_config_t io_conf = {
