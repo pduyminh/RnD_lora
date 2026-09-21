@@ -35,7 +35,7 @@ typedef struct __attribute__((packed)) {
 
 /**
  * @brief Gói telemetry RX -> TX (8 bytes packed)
- * Định nghĩa đúng các trường và thứ tự theo mục 4.2 trong knowledge.md và task.md (8 bytes).
+ * Định nghĩa đúng các trường và thứ tự theo mục 4.2 trong knowledge.md (đặc tả đã cập nhật chính thức).
  * Gồm: magic (1) + seq_echo (2) + driver_fault_bitmap (1) + link_ok (1) + reserved (1) + crc16 (2) = 8 bytes.
  */
 typedef struct __attribute__((packed)) {
@@ -43,7 +43,7 @@ typedef struct __attribute__((packed)) {
     uint16_t seq_echo;            // seq của ctrl_packet_t gần nhất nhận được hợp lệ
     uint8_t  driver_fault_bitmap; // dự phòng cho tương lai, hiện luôn = 0 (không đọc ALM)
     uint8_t  link_ok;             // 1 nếu chưa vượt failsafe timeout
-    uint8_t  reserved;            // byte dự phòng đảm bảo kích thước 8 bytes packed theo tiêu chí task.md
+    uint8_t  reserved;            // 0x00 dự phòng căn chỉnh đúng 8 bytes packed theo tiêu chuẩn
     uint16_t crc16;               // CRC-16/CCITT-FALSE tính trên các byte trước nó
 } telemetry_packet_t;
 
