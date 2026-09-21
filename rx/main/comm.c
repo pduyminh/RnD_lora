@@ -49,12 +49,12 @@ bool comm_process_packet(const uint8_t *src_mac, const uint8_t *data, size_t dat
     const ctrl_packet_t *pkt = (const ctrl_packet_t *)data;
 
     /* 2. Kiểm tra magic byte */
-    if (pkt->magic != CTRL_MAGIC) {
+    if (pkt->magic != CTRL_PACKET_MAGIC) {
         portENTER_CRITICAL(&s_comm_mux);
         s_dropped_packet_count++;
         portEXIT_CRITICAL(&s_comm_mux);
         ESP_LOGW(TAG, "Loại bỏ gói: sai magic (0x%02X != 0x%02X). Tổng gói loại: %lu",
-                 pkt->magic, CTRL_MAGIC, (unsigned long)s_dropped_packet_count);
+                 pkt->magic, CTRL_PACKET_MAGIC, (unsigned long)s_dropped_packet_count);
         return false;
     }
 
@@ -146,7 +146,7 @@ static void send_telemetry_echo(const uint8_t *dest_mac, uint16_t seq)
     }
 
     telemetry_packet_t telem = {
-        .magic = TELEMETRY_MAGIC,
+        .magic = TELEMETRY_PACKET_MAGIC,
         .seq_echo = seq,
         .driver_fault_bitmap = 0x00,
         .link_ok = 1,

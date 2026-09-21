@@ -80,7 +80,7 @@ void app_main(void)
 
     /* Self-test: Thử nghiệm gói tin giả lập để kiểm tra bộ lọc validation */
     ctrl_packet_t mock_pkt = {
-        .magic = CTRL_MAGIC,
+        .magic = CTRL_PACKET_MAGIC,
         .seq = 1,
         .vx_mm_s = 500,     // 0.5 m/s
         .vy_mm_s = 0,
