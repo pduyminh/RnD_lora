@@ -242,20 +242,57 @@ void tx_build_ctrl_packet(ctrl_packet_t *pkt)
     bool client_active = (s_ws_client_count > 0) &&
                          (pdTICKS_TO_MS(now - s_last_ws_rx_tick) <= 500);
 
-    if (client_active) {
-        pkt->vx_mm_s = s_vx_mm_s;
-        pkt->vy_mm_s = s_vy_mm_s;
-        pkt->omega_mrad_s = s_omega_mrad_s;
-        pkt->estop = s_estop;
-    } else {
+    if (s_estop) {
         pkt->vx_mm_s = 0;
         pkt->vy_mm_s = 0;
         pkt->omega_mrad_s = 0;
         pkt->estop = s_estop;
+    } else if (client_active) {
+        pkt->vx_mm_s = s_vx_mm_s;
+        pkt->vy_mm_s = s_vy_mm_s;
+        pkt->omega_mrad_s = s_omega_mrad_s;
+        pkt->estop = 0;
+    } else {
+        pkt->vx_mm_s = 0;
+        pkt->vy_mm_s = 0;
+        pkt->omega_mrad_s = 0;
+        pkt->estop = 0;
     }
     portEXIT_CRITICAL(&s_tx_mux);
 
     pkt->crc16 = ctrl_packet_calc_crc(pkt);
+}
+
+int16_t tx_get_vx(void)
+{
+    int16_t vx;
+    portENTER_CRITICAL(&s_tx_mux);
+    vx = s_vx_mm_s;
+    portEXIT_CRITICAL(&s_tx_mux);
+    return vx;
+}
+
+void tx_set_estop(uint8_t estop)
+{
+    portENTER_CRITICAL(&s_tx_mux);
+    s_estop = estop;
+    portEXIT_CRITICAL(&s_tx_mux);
+}
+
+uint8_t tx_get_estop(void)
+{
+    uint8_t estop;
+    portENTER_CRITICAL(&s_tx_mux);
+    estop = s_estop;
+    portEXIT_CRITICAL(&s_tx_mux);
+    return estop;
+}
+
+esp_err_t tx_send_packet_now(void)
+{
+    ctrl_packet_t pkt;
+    tx_build_ctrl_packet(&pkt);
+    return esp_now_send(s_broadcast_mac, (const uint8_t *)&pkt, sizeof(pkt));
 }
 
 static void espnow_tx_task(void *arg)

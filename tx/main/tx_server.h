@@ -51,6 +51,26 @@ uint16_t tx_get_current_seq(void);
  */
 void tx_build_ctrl_packet(ctrl_packet_t *pkt);
 
+/**
+ * @brief Lấy giá trị vận tốc vx hiện tại (mm/s).
+ */
+int16_t tx_get_vx(void);
+
+/**
+ * @brief Đặt cờ E-Stop phần mềm từ nút bấm vật lý TM1638.
+ */
+void tx_set_estop(uint8_t estop);
+
+/**
+ * @brief Lấy cờ E-Stop hiện tại.
+ */
+uint8_t tx_get_estop(void);
+
+/**
+ * @brief Gửi ngay 1 gói tin ctrl_packet_t qua ESP-NOW không cần chờ chu kỳ 20ms.
+ */
+esp_err_t tx_send_packet_now(void);
+
 #ifdef __cplusplus
 }
 #endif

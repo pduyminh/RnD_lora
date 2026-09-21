@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "protocol.h"
 #include "tx_server.h"
+#include "tm1638.h"
 
 static const char *TAG = "OMNI_TX";
 
@@ -40,6 +41,14 @@ void app_main(void)
         ESP_LOGE(TAG, "Lỗi khởi tạo TX Server: %s", esp_err_to_name(srv_err));
     } else {
         ESP_LOGI(TAG, "TX Server sẵn sàng (SoftAP: %s, ESP-NOW 50Hz).", TX_AP_SSID);
+    }
+
+    /* 4. T06: Khởi tạo module TM1638 (STB=4, CLK=5, DIO=6, E-stop button 1, LED & 7-seg) */
+    esp_err_t tm_err = tm1638_init();
+    if (tm_err != ESP_OK) {
+        ESP_LOGE(TAG, "Lỗi khởi tạo TM1638: %s", esp_err_to_name(tm_err));
+    } else {
+        ESP_LOGI(TAG, "TM1638 khởi tạo thành công (STB: 4, CLK: 5, DIO: 6).");
     }
 
     /* 4. Cấu hình GPIO2 làm output cho status LED */
