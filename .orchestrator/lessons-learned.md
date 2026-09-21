@@ -28,3 +28,7 @@ description: Các lỗi đã gặp và cách tránh lặp lại — Codex/AGY đ
 - **Giải pháp chuẩn hóa**:
   - Tần số chu kỳ điều khiển: 20 ms (50 Hz). Gia tốc tối đa $a_{\max} \le 2.0\text{ m/s}^2$ quy đổi ra bước tăng vận tốc tối đa $\sim 1018.6\text{ pps} / 20\text{ms}$.
   - Tích hợp thuật toán mượt hóa (S-curve / smooth easing / jerk limitation) khi vận tốc tiệm cận 0 (lúc bắt đầu đề-pa và lúc chuẩn bị dừng hẳn) để việc khởi động và phanh dừng diễn ra êm ái, bảo vệ cơ cấu chấp hành.
+
+## 5. Không tuyên bố kiểm chứng phần cứng khi chưa có bằng chứng
+- **Hiện tượng**: `self-check` từng ghi đã nạp và kiểm tra trên board trong khi kiểm chứng phần cứng vẫn đang `BLOCKED`, tạo mâu thuẫn và làm giảm độ tin cậy của báo cáo.
+- **Giải pháp chuẩn hóa**: Chỉ ghi “đã kiểm chứng” khi có bằng chứng thực nghiệm tương ứng; nếu chưa có phần cứng, phải tách rõ kết quả build/static test khỏi hạng mục vật lý và giữ trạng thái `BLOCKED` nhất quán trong `self-check`, `work-log` và báo cáo audit.
