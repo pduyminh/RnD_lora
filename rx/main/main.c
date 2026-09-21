@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "protocol.h"
 #include "kinematics.h"
+#include "axis_driver.h"
 
 static const char *TAG = "OMNI_RX";
 
@@ -60,7 +61,15 @@ void app_main(void)
     ESP_LOGI(TAG, "Kinematics Ramp 1-step (20ms) -> Axis A: %ld, Axis B: %ld, Axis C: %ld pps (Anti-Jerk start)",
              (long)current_pps[0], (long)current_pps[1], (long)current_pps[2]);
 
-    /* 3. Cấu hình GPIO2 làm output cho status LED */
+    /* 4. T03: Khởi tạo Axis Driver (MCPWM cho PUL, GPIO cho DIR/ENA, tự động khóa giữ ENA lúc boot) */
+    esp_err_t axis_err = axis_driver_init();
+    if (axis_err != ESP_OK) {
+        ESP_LOGE(TAG, "Lỗi khởi tạo Axis Driver: %s", esp_err_to_name(axis_err));
+    } else {
+        ESP_LOGI(TAG, "Axis Driver sẵn sàng. Cả 3 trục đã khóa lực giữ ENA.");
+    }
+
+    /* 5. Cấu hình GPIO2 làm output cho status LED */
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << STATUS_LED_GPIO),
         .mode = GPIO_MODE_OUTPUT,

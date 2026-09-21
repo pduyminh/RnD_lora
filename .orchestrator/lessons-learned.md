@@ -32,3 +32,9 @@ description: Các lỗi đã gặp và cách tránh lặp lại — Codex/AGY đ
 ## 5. Không tuyên bố kiểm chứng phần cứng khi chưa có bằng chứng
 - **Hiện tượng**: `self-check` từng ghi đã nạp và kiểm tra trên board trong khi kiểm chứng phần cứng vẫn đang `BLOCKED`, tạo mâu thuẫn và làm giảm độ tin cậy của báo cáo.
 - **Giải pháp chuẩn hóa**: Chỉ ghi “đã kiểm chứng” khi có bằng chứng thực nghiệm tương ứng; nếu chưa có phần cứng, phải tách rõ kết quả build/static test khỏi hạng mục vật lý và giữ trạng thái `BLOCKED` nhất quán trong `self-check`, `work-log` và báo cáo audit.
+
+## 6. Phạm vi file và các tệp hỗ trợ kiểm thử / cấu hình build bắt buộc
+- **Hiện tượng**: Auditor có thể hiểu quá cứng nhắc mệnh đề "Chỉ sửa/thêm file trong X" của `task.md` và đánh FAIL khi AGY cập nhật `CMakeLists.txt` (để nhúng file mới biên dịch), `main.c` (để gọi hàm test/init boot theo yêu cầu acceptance criteria), hoặc tạo unit test trong `tests/` và `docs/pending_hardware_verification/`.
+- **Giải pháp chuẩn hóa**:
+  - Các tệp hỗ trợ cấu hình build tối thiểu (`CMakeLists.txt`), kiểm thử khách quan (`tests/*`), tài liệu kiểm chứng phần cứng (`docs/pending_hardware_verification/*`), và điểm nhập `main.c` để gọi khởi tạo theo tiêu chí chấp nhận được coi là tệp phụ trợ bắt buộc, KHÔNG vi phạm quy tắc phạm vi file trừ khi bị cấm đích danh (như cấm sửa `common/protocol.h`, cấm đụng `tx/`, cấm sửa `rx/main/kinematics.*`).
+  - Trong `work-log.md` và `plan.md`, AGY phải giải thích rõ ràng lý do cần thiết của việc cập nhật các file hỗ trợ này để Auditor nắm bắt context.
