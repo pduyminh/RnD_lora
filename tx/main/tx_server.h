@@ -71,6 +71,11 @@ uint8_t tx_get_estop(void);
  */
 esp_err_t tx_send_packet_now(void);
 
+/**
+ * @brief Đẩy bản tin chuỗi JSON tới tất cả các WebSocket client đang kết nối.
+ */
+esp_err_t tx_broadcast_ws_message(const char *msg);
+
 #ifdef __cplusplus
 }
 #endif

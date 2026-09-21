@@ -65,6 +65,7 @@ static const char INDEX_HTML[] =
 "<body>"
 "<h2>OMNI ROBOT TX</h2>"
 "<div id='status' class='disconnected'>WebSocket: Disconnected</div>"
+"<div id='rx-status' style='margin:5px 0;font-size:16px;font-weight:bold;color:#ff3333;'>RX Link: MẤT KẾT NỐI</div>"
 "<div id='joystick-container'>"
 "  <div id='joystick-handle'></div>"
 "</div>"
@@ -90,6 +91,19 @@ static const char INDEX_HTML[] =
 "  ws = new WebSocket(wsUri);"
 "  ws.onopen = function() { statusEl.textContent = 'WebSocket: Connected'; statusEl.className = 'connected'; };"
 "  ws.onclose = function() { statusEl.textContent = 'WebSocket: Disconnected'; statusEl.className = 'disconnected'; setTimeout(connectWS, 1000); };"
+"  ws.onmessage = function(e) {"
+"    try {"
+"      var d = JSON.parse(e.data);"
+"      var rxEl = document.getElementById('rx-status');"
+"      if (d.rx_link === 'OK' || d.link_ok === true || d.link_ok === 1) {"
+"        rxEl.textContent = 'RX Link: OK';"
+"        rxEl.style.color = '#00ff66';"
+"      } else {"
+"        rxEl.textContent = 'RX Link: MẤT KẾT NỐI';"
+"        rxEl.style.color = '#ff3333';"
+"      }"
+"    } catch(err) {}"
+"  };"
 "}"
 "connectWS();"
 "function sendCommand() {"
@@ -293,6 +307,28 @@ esp_err_t tx_send_packet_now(void)
     ctrl_packet_t pkt;
     tx_build_ctrl_packet(&pkt);
     return esp_now_send(s_broadcast_mac, (const uint8_t *)&pkt, sizeof(pkt));
+}
+
+esp_err_t tx_broadcast_ws_message(const char *msg)
+{
+    if (!s_http_server || !msg) return ESP_FAIL;
+    size_t fds_count = 8;
+    int client_fds[8];
+    esp_err_t ret = httpd_get_client_list(s_http_server, &fds_count, client_fds);
+    if (ret != ESP_OK) return ret;
+
+    httpd_ws_frame_t ws_pkt;
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = (uint8_t *)msg;
+    ws_pkt.len = strlen(msg);
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+    for (size_t i = 0; i < fds_count; i++) {
+        if (httpd_ws_get_fd_info(s_http_server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+            httpd_ws_send_frame_async(s_http_server, client_fds[i], &ws_pkt);
+        }
+    }
+    return ESP_OK;
 }
 
 static void espnow_tx_task(void *arg)

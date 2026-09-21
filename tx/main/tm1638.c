@@ -7,6 +7,7 @@
 #include "esp_log.h"
 #include "esp_rom_sys.h"
 #include "tx_server.h"
+#include "telemetry.h"
 
 static const char *TAG = "TM1638";
 
@@ -240,6 +241,9 @@ static void tm1638_task(void *arg)
         uint32_t ws_clients = tx_get_ws_client_count();
         int16_t cur_vx = tx_get_vx();
         bool is_estop = tm1638_get_estop();
+
+        /* T07: Cập nhật LED đơn thứ 2 (index 1): sáng khi mất kết nối RX, tắt khi bình thường */
+        tm1638_set_led(1, !telemetry_is_link_ok());
 
         tm1638_display_status((uint8_t)ws_clients, cur_vx, is_estop);
 

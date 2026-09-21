@@ -7,6 +7,7 @@
 #include "protocol.h"
 #include "tx_server.h"
 #include "tm1638.h"
+#include "telemetry.h"
 
 static const char *TAG = "OMNI_TX";
 
@@ -49,6 +50,14 @@ void app_main(void)
         ESP_LOGE(TAG, "Lỗi khởi tạo TM1638: %s", esp_err_to_name(tm_err));
     } else {
         ESP_LOGI(TAG, "TM1638 khởi tạo thành công (STB: 4, CLK: 5, DIO: 6).");
+    }
+
+    /* 5. T07: Khởi tạo hệ thống giám sát Telemetry từ RX qua ESP-NOW */
+    esp_err_t telem_err = telemetry_init();
+    if (telem_err != ESP_OK) {
+        ESP_LOGE(TAG, "Lỗi khởi tạo Telemetry: %s", esp_err_to_name(telem_err));
+    } else {
+        ESP_LOGI(TAG, "Telemetry RX sẵn sàng (Timeout: %d ms, giám sát kết nối hai chiều).", TELEMETRY_TIMEOUT_MS);
     }
 
     /* 4. Cấu hình GPIO2 làm output cho status LED */
