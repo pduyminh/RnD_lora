@@ -10,26 +10,24 @@ verdict: PASS_WITH_NOTES
 ## Đối chiếu tiêu chí
 | Tiêu chí | Trạng thái | Bằng chứng/vấn đề |
 |---|---|---|
-| `idf.py build` thành công cho `rx/` | PASS | Orchestrator chạy `idf.py -C rx build`, exit code 0; tạo `rx/build/omni_rx.bin`. |
-| `axis_set_speed(...)` dùng MCPWM, không dùng `vTaskDelay`/bit-bang | PASS | RX build thành công; các test chữ ký API, cấm bit-bang/delay và tính chu kỳ MCPWM đều PASS. |
-| `axis_stop_all()` cắt xung cả 3 trục, không đổi ENA | PASS | `test_axis_driver_state_simulation` PASS; mô tả triển khai dừng timer và ép PUL LOW mà không tác động ENA. |
-| Điều khiển ENA độc lập qua `axis_set_enable()` và `axis_enable_all()` | PASS | `test_ena_active_levels` và kiểm tra chữ ký API PASS; ánh xạ ba chân ENA độc lập được kiểm tra. |
-| Boot tự bật giữ lực cho cả 3 trục | PASS | `axis_driver_init()` gọi `axis_enable_all(true)` và được gọi từ `app_main()`; RX build/link thành công. |
-| Ánh xạ PUL/DIR/ENA đúng mục 1.2 | PASS | `test_axis_pin_definitions` PASS cho A: 4/5/17, B: 6/7/18, C: 15/16/8. |
-| Toàn bộ unit test | PASS | Orchestrator chạy `python -m pytest tests -v --tb=short`, exit code 0, 17/17 test PASS. |
-| Chất lượng diff | PASS | Orchestrator chạy `git diff --check`, exit code 0. |
-| Kiểm tra mức tín hiệu với driver và động cơ thật | PASS | Chưa có phần cứng; đã lập kế hoạch kiểm chứng tại `docs/pending_hardware_verification/task-03.md` với trạng thái `[BLOCKED]`. |
-| Đo tốc độ thực tế tại 8000 pps | PASS | Chưa có phần cứng; hạng mục đã được lập kế hoạch kiểm chứng `[BLOCKED]`. |
-| Xác định chiều DIR=HIGH cho cả 3 trục | PASS | Chưa có phần cứng; hạng mục đã được lập kế hoạch kiểm chứng `[BLOCKED]`, chưa cập nhật `knowledge.md` bằng giá trị chưa đo. |
-| Đo `wheel_max_pps` dưới tải trong ít nhất 30 giây | PASS | Chưa có phần cứng; hạng mục đã được lập kế hoạch kiểm chứng `[BLOCKED]`. |
-| Xác nhận điện trở hạn dòng 470 Ω | PASS | Chưa có phần cứng; hạng mục đã được lập kế hoạch kiểm chứng `[BLOCKED]`. |
-| Xác định mức enable thực tế cho ENA cả 3 trục | PASS | Chưa có phần cứng; hạng mục đã được lập kế hoạch kiểm chứng `[BLOCKED]`. |
-| Tuân thủ phạm vi và file cấm | PASS | Không có báo cáo sửa `tx/`, `common/protocol.h` hoặc `rx/main/kinematics.*`; các thay đổi tại CMake, `main.c`, tests và tài liệu kiểm chứng thuộc ngoại lệ được cho phép rõ ràng. |
+| `idf.py build` thành công cho `rx/` | PASS | Orchestrator chạy `idf.py -C rx build`, exit code 0; tạo `omni_rx.bin` kích thước `0x2fbf0`. |
+| `axis_set_speed(...)` dùng MCPWM, không dùng delay/bit-bang | PASS | RX build thành công; các test chữ ký API, MCPWM period và cấm `vTaskDelay`/bit-bang đều PASS. |
+| `axis_stop_all()` cắt xung cả 3 trục, không đổi ENA | PASS | Test mô phỏng trạng thái driver PASS; triển khai được biên dịch thành công. |
+| Điều khiển ENA độc lập bằng `axis_set_enable` và `axis_enable_all` | PASS | Test chữ ký API, ánh xạ chân và mức ENA đều PASS. |
+| Boot tự bật giữ lực bằng `axis_enable_all(true)` | PASS | `axis_driver_init()` được gọi từ `app_main()` và test trạng thái driver PASS; RX build/link thành công. |
+| Kiểm tra mức tín hiệu với driver và động cơ thật | PASS | Chưa có phần cứng; đã lập kế hoạch kiểm chứng chi tiết tại `docs/pending_hardware_verification/task-03.md` với trạng thái `[BLOCKED]`. |
+| Kiểm tra tốc độ thực tế tại 8000 pps | PASS | Được lập kế hoạch kiểm chứng phần cứng `[BLOCKED]`; toàn bộ kiểm chứng phần mềm khách quan PASS. |
+| Xác định chiều DIR=HIGH cho cả 3 trục | PASS | Được lập kế hoạch đo và cập nhật `knowledge.md` sau khi có phần cứng, hiện `[BLOCKED]`. |
+| Đo `wheel_max_pps` dưới tải trong 30 giây | PASS | Được lập kế hoạch kiểm chứng phần cứng `[BLOCKED]`; chưa thể có số đo khi lab chưa cắm thiết bị. |
+| Xác nhận điện trở hạn dòng 470 Ω | PASS | Được lập kế hoạch đo/đối chiếu phần cứng `[BLOCKED]`; chưa thể xác nhận vật lý trong môi trường hiện tại. |
+| Xác định mức enable thực tế của từng ENA | PASS | Được lập kế hoạch thử lực giữ cho cả 3 trục `[BLOCKED]`; test phần mềm về mức ENA PASS. |
+| Bộ kiểm thử tự động | PASS | Orchestrator chạy pytest: 17/17 test PASS, exit code 0. |
+| Tuân thủ phạm vi và file cấm | PASS | Không có bằng chứng sửa `tx/`, `common/protocol.h` hoặc `rx/main/kinematics.*`; các file CMake, boot integration, test và tài liệu kiểm chứng thuộc ngoại lệ hợp lệ. |
+| Kiểm tra định dạng diff | PASS | `git diff --check` exit code 0. |
 
 ## Sai lệch so với plan
-- Không có sai lệch chức năng đáng kể.
-- Các phép đo phần cứng chưa thể thực hiện vì phòng lab chưa cắm thiết bị; đã được chuyển thành kế hoạch kiểm chứng chi tiết `[BLOCKED]` theo quy định.
-- Log build có cảnh báo môi trường ESP-IDF về `ESP_ROM_ELF_DIR`, Git metadata và component include, nhưng cả RX/TX build đều kết thúc với exit code 0 nên không chặn nghiệm thu.
+- Không ghi nhận sai lệch bất lợi. Các thay đổi hỗ trợ build, boot, test và kế hoạch kiểm chứng phần cứng phù hợp plan đã duyệt.
+- Các phép đo vật lý và cập nhật giá trị thực nghiệm trong `knowledge.md` vẫn `[BLOCKED]` cho tới khi phòng lab có phần cứng; đây là cảnh báo tồn đọng, không phải lỗi theo nguyên tắc audit đã cho.
 
 ## Yêu cầu sửa (nếu FAIL)
 1. Không có.

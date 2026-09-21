@@ -1,6 +1,6 @@
 {
   "task_id": "T-2026-0919-03",
-  "round": 2,
+  "round": 3,
   "phase": "done",
   "verdict": "PASS_WITH_NOTES",
   "history": [
@@ -8,7 +8,8 @@
     "agy:execute:r1",
     "codex:audit:r1",
     "agy:execute:r2",
-    "codex:audit:r2"
+    "agy:execute:r3",
+    "codex:audit:r3"
   ],
   "fail_counts": [
     1
