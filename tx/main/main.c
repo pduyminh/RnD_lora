@@ -5,6 +5,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "protocol.h"
+#include "tx_server.h"
 
 static const char *TAG = "OMNI_TX";
 
@@ -33,7 +34,15 @@ void app_main(void)
     ESP_LOGI(TAG, "CRC-16/CCITT-FALSE self-test: input=\"%s\", expected=0x%04X, actual=0x%04X -> %s",
              test_input, expected_crc, actual_crc, crc_pass ? "PASS" : "FAIL");
 
-    /* 3. Cấu hình GPIO2 làm output cho status LED */
+    /* 3. T05: Khởi tạo SoftAP, HTTP Web Server, WebSocket và 50Hz ESP-NOW Sender */
+    esp_err_t srv_err = tx_server_init();
+    if (srv_err != ESP_OK) {
+        ESP_LOGE(TAG, "Lỗi khởi tạo TX Server: %s", esp_err_to_name(srv_err));
+    } else {
+        ESP_LOGI(TAG, "TX Server sẵn sàng (SoftAP: %s, ESP-NOW 50Hz).", TX_AP_SSID);
+    }
+
+    /* 4. Cấu hình GPIO2 làm output cho status LED */
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << STATUS_LED_GPIO),
         .mode = GPIO_MODE_OUTPUT,
